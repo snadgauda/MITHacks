@@ -10,6 +10,7 @@ from group_word import*
 
 import base64
 import enchant
+from mathpix import*
 
 
 space_x = 10
@@ -39,7 +40,7 @@ def determine_math(word_array):
 
 	for word in word_array:
 
-		word_dictionary_description = word.get_description().translate({ord(c): None for c in '.?,;:!`()%'}).lower()
+		word_dictionary_description = word.get_description().translate({ord(c): None for c in '.\\?,;:!`()%/'}).lower()
 
 		if (word_dictionary_description != '' and dict.check(word_dictionary_description)):
 			if (verify_helper(word_dictionary_description)):
@@ -48,14 +49,14 @@ def determine_math(word_array):
 			word.set_math(1)
 
 def verify_helper(string):
-	if string in {"n", "x", "y", "z", "k", "p", "q", "b", "c", "e", "f", "g", "m"} or string.isnumeric():
+	if string in {"n", "x", "y", "z", "k", "p", "q", "b", "c", "e", "f", "g", "m"}:
 		return True
 	else:
 		return False
 
 def make_lines(word_array, img_width, img_height):
 	return_val = [[word_array[0]]]
-	for i in range(len(word_array) - 2):
+	for i in range(len(word_array) - 1):
 		word = word_array[i]
 		next_word = word_array[i + 1]
 
@@ -66,32 +67,37 @@ def make_lines(word_array, img_width, img_height):
 			return_val.append([next_word])
 		else: #math or text match, 
 			return_val[-1].append(next_word)
-	return return_val
 
 	# for line in return_val:
-	# 	print ("[")
 	# 	for line_word in line:
 	# 		print(line_word.toString())
-	# 	print("]")
+	return return_val
 
-def condense_lines (word_array, img_height):
+	
+def condense_lines (word_array, img_height, file_path):
 
-	return_val = [word_array[0][0]]
+	return_val = [Group_Word()]
 
-	for line in word_array:
-		if (len(line) <= 1):
-			return_val.append(line[0])
+	for word_list in word_array:
+		for word in word_list:
+
+			if (return_val[-1].get_math() == word.get_math()):
+				return_val[-1] = return_val[-1].merge(word)
+			else:
+				return_val += [word]
+
+
+	return_val2 = []
+	for word in return_val:
+		if word.get_math():
+			return_val2 += [printLatex(file_path, word)]
 		else:
-			for i in range(len(line) - 2):
-				next_word = line[i+1]
-				if line[i].should_merge_lines(next_word, space_y, img_height)[0] == True: #line characters all same
-					return_val[-1] = return_val[-1].merge(next_word)
-				else if line[i].should_merge_lines(next_word, space_y, img_height)[0] == False and line[i].should_merge_lines(next_word, space_y, img_height)[1] == True:
-					
-				else:
-				 	return_val.append(next_word)
-	for line in return_val:
+			return_val2 += [word]		
+
+	for line in return_val2:
 		print(line.toString())
+		print("=========================")
+				
 	print("END")
 
 def make_paragraph():
@@ -116,7 +122,7 @@ if __name__ == '__main__':
     width, height = Image.open(image_to_process).size
 
     lines_array = make_lines(word_array, width, height)
-    condense_lines(lines_array, height)
+    condense_lines(lines_array, height, image_to_process)
 
     '''for d in word_array:
     	print(d.toString())'''

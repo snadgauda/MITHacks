@@ -14,19 +14,38 @@ class Group_Word:
 	def get_description(self):
 		return self.DESCRIPTION
 
+	def get_x(self):
+		return self.X
+
+	def get_y(self):
+		return self.Y
+
+	def get_width(self):
+		return self.WIDTH
+
+	def get_height(self):
+		return self.HEIGHT
+
+	def get_math(self):
+		return self.IS_MATH
+
+
 	def set_description(self, description):
 		self.DESCRIPTION = description
 
 	def set_math(self, is_math):
 		self.IS_MATH = is_math
 
+
+
+
 	def merge(self, other_word):
 		new_word = Group_Word(
 			self.DESCRIPTION + " " + other_word.DESCRIPTION, 
-			min(self.X, other_word.X), 
-			min(self.Y, other_word.Y), 
-			max(self.X, other_word.X) - min(self.X, other_word.X),
-			max(self.Y, other_word.Y) - min(self.Y, other_word.Y), 
+			self.X, 
+			self.Y, 
+			abs(self.X - other_word.X) + other_word.WIDTH,
+			abs(self.Y - other_word.Y) + self.HEIGHT, 
 			self.IS_MATH)
 		return new_word
 
